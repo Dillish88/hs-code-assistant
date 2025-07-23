@@ -1,0 +1,35 @@
+import streamlit as st
+import pandas as pd
+import os
+
+# Path to your CSV file
+DATA_PATH = "data/codes.csv"
+
+st.title("HS Code Assistant")
+
+# Load data
+if os.path.exists(DATA_PATH):
+    df = pd.read_csv(DATA_PATH)
+    # Ensure description is string type
+    df['description'] = df['description'].astype(str)
+else:
+    st.error("HS code data not found at data/codes.csv.")
+    st.stop()
+
+# User input for product search
+query = st.text_input("Type a product (e.g., cotton):")
+
+if query:
+    # Find all descriptions containing the query (case-insensitive)
+    matches = df[df['description'].str.contains(query, case=False, na=False)]
+    options = matches['description'].unique().tolist()
+    if options:
+        selected_description = st.selectbox("Select a matching product description:", options)
+        # Show HS code(s) for the selected description
+        result = df[df['description'] == selected_description]
+        st.write("HS Code(s) for your selection:")
+        st.dataframe(result)
+    else:
+        st.info("No matching products found. Try a different search.")
+else:
+    st.info("Start typing a product name to see suggestions.")
